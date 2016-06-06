@@ -123,7 +123,7 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
         forwardButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (mCurrentIndex < mPagination.size()) {
+                if (mCurrentIndex < mPagination.size() - 1) {
                     mCurrentIndex++;
                     update();
                 }
@@ -238,13 +238,11 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
                     mPagination.mPages.clear();
 
-                    if (!prevText.equals(""))
-                        mPagination.mPages.addAll(prevPagination.mPages);
+                    mPagination.mPages.addAll(prevPagination.mPages);
 
                     mPagination.mPages.add(newCurrentText);
 
-                    if (!nextText.equals(""))
-                        mPagination.mPages.addAll(nextPagination.mPages);
+                    mPagination.mPages.addAll(nextPagination.mPages);
                     mCurrentIndex = prevPagination.mPages.size();
                     update();
                 }
@@ -260,13 +258,21 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
                     StringBuilder stringBuilder;
                     CharSequence nextPageText = "";
 
-                    if (mCurrentIndex < mPagination.size() - 1)
+                    try {
                         nextPageText = mPagination.mPages.get(mCurrentIndex + 1);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
 
                     stringBuilder = new StringBuilder();
-                    stringBuilder.append(mPagination.mPages.get(mCurrentIndex));
-                    if (mCurrentIndex < mPagination.size() - 1)
+
+                    try {
+                        stringBuilder.append(mPagination.mPages.get(mCurrentIndex));
                         stringBuilder.append(mPagination.mPages.get(mCurrentIndex + 1));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
                     currentText = stringBuilder.toString();
 
                     stringBuilder = new StringBuilder();
@@ -311,11 +317,8 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
                     int startIndex = currentText.length() - newCurrentText.length();
                     stringBuilder = new StringBuilder();
-
-                    if (nextPageText.equals("")) {
-                        startIndex = nextPageText.length() - startIndex;
-                        stringBuilder.append(nextText.subSequence(startIndex, nextText.length()));
-                    }
+                    startIndex = nextPageText.length() - startIndex;
+                    stringBuilder.append(nextText.subSequence(startIndex, nextText.length()));
                     nextText = stringBuilder.toString();
 
                     nextPagination = new Pagination(nextText,
@@ -329,8 +332,7 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
                     mPagination.mPages.clear();
 
-                    if (!prevText.equals(""))
-                        mPagination.mPages.addAll(prevPagination.mPages);
+                    mPagination.mPages.addAll(prevPagination.mPages);
 
                     mPagination.mPages.add(newCurrentText);
 
