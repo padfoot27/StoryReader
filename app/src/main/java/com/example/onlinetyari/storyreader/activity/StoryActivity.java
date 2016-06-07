@@ -15,7 +15,9 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewTreeObserver;
+import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -25,13 +27,16 @@ import com.example.onlinetyari.storyreader.pagination.Pagination;
 import java.util.Collections;
 
 public class StoryActivity extends AppCompatActivity implements
+        ViewTreeObserver.OnGlobalLayoutListener,
         SeekBar.OnSeekBarChangeListener,
         View.OnClickListener {
 
     public TextView textView;
-    public Button backButton;
-    public Button forwardButton;
+    public LinearLayout backButton;
+    public LinearLayout centreButton;
+    public LinearLayout forwardButton;
     public SeekBar seekBar;
+    public Toolbar toolbar;
 
     public Pagination mPagination;
     public Pagination prevPagination;
@@ -56,9 +61,11 @@ public class StoryActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_story);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         assert toolbar != null;
         toolbar.setTitle(R.string.app_name);
+        setSupportActionBar(toolbar);
+        getSupportActionBar().show();
 
         textView = (TextView) findViewById(R.id.textView);
         assert textView != null;
@@ -68,7 +75,6 @@ public class StoryActivity extends AppCompatActivity implements
             sb.append("This text helps to create some bulk content. " + i + " \n");
         }
         String book_content = sb.toString();
-        textView.setOnClickListener(this);
 
         Spanned htmlString = Html.fromHtml(book_content);
         mText = TextUtils.concat(htmlString);
@@ -124,11 +130,12 @@ public class StoryActivity extends AppCompatActivity implements
             }
         });
 
-        backButton = (Button) findViewById(R.id.back_btn);
-        forwardButton = (Button) findViewById(R.id.forward_btn);
+        backButton = (LinearLayout) findViewById(R.id.back_btn);
+        centreButton = (LinearLayout) findViewById(R.id.centre_btn);
+        forwardButton = (LinearLayout) findViewById(R.id.forward_btn);
 
         backButton.setOnClickListener(this);
-
+        centreButton.setOnClickListener(this);
         forwardButton.setOnClickListener(this);
 
         seekBar = (SeekBar) findViewById(R.id.seek_bar);
@@ -268,7 +275,7 @@ public class StoryActivity extends AppCompatActivity implements
 
                     StringBuilder stringBuilder;
                     CharSequence nextPageText = "";
-
+                    CharSequence currentOriginalText = "";
                     try {
                         nextPageText = mPagination.mPages.get(mCurrentIndex + 1);
                     } catch (Exception e) {
@@ -279,6 +286,7 @@ public class StoryActivity extends AppCompatActivity implements
 
                     try {
                         stringBuilder.append(mPagination.mPages.get(mCurrentIndex));
+                        currentOriginalText = mPagination.mPages.get(mCurrentIndex);
                         stringBuilder.append(mPagination.mPages.get(mCurrentIndex + 1));
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -327,12 +335,17 @@ public class StoryActivity extends AppCompatActivity implements
 
                     int startIndex = currentText.length() - newCurrentText.length();
                     stringBuilder = new StringBuilder();
-                    if (startIndex < nextPageText.length())
+                    if (startIndex < nextPageText.length()) {
                         startIndex = nextPageText.length() - startIndex;
-                    else startIndex = startIndex - nextPageText.length();
-
-                    stringBuilder.append(nextText.subSequence(startIndex, nextText.length()));
-                    nextText = stringBuilder.toString();
+                        stringBuilder.append(nextText.subSequence(startIndex, nextText.length()));
+                        nextText = stringBuilder.toString();
+                    } else {
+                        startIndex -= nextPageText.length();
+                        startIndex = currentOriginalText.length() - startIndex;
+                        stringBuilder.append(currentOriginalText.subSequence(startIndex, currentOriginalText.length()));
+                        stringBuilder.append(nextText);
+                        nextText = stringBuilder.toString();
+                    }
 
                     nextPagination = new Pagination(nextText,
                             textView.getWidth(),
@@ -463,10 +476,19 @@ public class StoryActivity extends AppCompatActivity implements
                                     }
                                     break;
 
-            case R.id.textView : seekBar.setVisibility(View.VISIBLE);
+            case R.id.centre_btn :
+
+                seekBar.setVisibility(View.VISIBLE);
+
                                  break;
 
             default : break;
         }
     }
+
+    @Override
+    public void onGlobalLayout() {
+
+    }
+
 }
