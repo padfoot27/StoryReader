@@ -1,5 +1,6 @@
 package com.example.onlinetyari.storyreader;
 
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -8,6 +9,7 @@ import android.text.Layout;
 import android.text.Spanned;
 import android.text.StaticLayout;
 import android.text.TextUtils;
+import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,26 +37,38 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
     public SeekBar seekBar;
     public int i;
     public int oldProgress = 24;
+    public SharedPreferences mSettings ;
+
+    public static final int MIN_FONT = 12;
+    public static final int MAX_FONT = 34;
+    public static final int MIN_PROGRESS = 0;
+    public static final int MAX_PROGRESS = 100;
+    public static final int OPTIMAL_FONT = 14;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_story);
-        /*Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
-*/
+
         textView = (TextView) findViewById(R.id.textView);
-
         assert textView != null;
-
+        textView.setTextSize(OPTIMAL_FONT);
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 100; i++) {
             sb.append("This text helps to create some bulk content. " + i + " \n");
         }
         String book_content = sb.toString();
+        textView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                seekBar.setVisibility(View.VISIBLE);
+            }
+        });
 
         Spanned htmlString = Html.fromHtml(book_content);
         mText = TextUtils.concat(htmlString);
+        mSettings = getSharedPreferences("Settings", 0);
+
         textView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
@@ -105,8 +119,6 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
             }
         });
 
-        getCurrentString();
-
         backButton = (Button) findViewById(R.id.back_btn);
         forwardButton = (Button) findViewById(R.id.forward_btn);
 
@@ -132,8 +144,10 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
         seekBar = (SeekBar) findViewById(R.id.seek_bar);
         assert seekBar != null;
+        oldProgress = (int) getProgress(OPTIMAL_FONT);
         seekBar.setProgress(oldProgress);
         seekBar.setOnSeekBarChangeListener(this);
+        seekBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -160,7 +174,7 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
     @Override
     public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
-        textView.setTextSize(progress);
+        textView.setTextSize(getProgress(progress));
 
         textView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -351,7 +365,7 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
-
+        seekBar.setVisibility(View.GONE);
     }
 
     @Override
@@ -361,7 +375,14 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
     private void update() {
         final CharSequence text = mPagination.get(mCurrentIndex);
-        if (text != null) textView.setText(text);
+        if (text != null) {
+            textView.setText(text);
+        }
+
+        if (mCurrentIndex == 0)
+            textView.setGravity(Gravity.BOTTOM);
+
+        else textView.setGravity(Gravity.NO_GRAVITY);
     }
 
     private CharSequence getCurrentString() {
@@ -411,6 +432,11 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
     public void resetPages() {
 
+    }
+
+    public float getProgress(int progress) {
+        float slope = ((float)(MAX_FONT - MIN_FONT) / (MAX_PROGRESS - MIN_PROGRESS));
+        return (float) MIN_FONT + (slope * (progress - MIN_PROGRESS));
     }
 
 }

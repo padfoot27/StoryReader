@@ -1,18 +1,16 @@
 package com.example.onlinetyari.storyreader;
 
-import android.text.DynamicLayout;
 import android.text.Layout;
 import android.text.StaticLayout;
 import android.text.TextPaint;
-import android.util.Log;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 /**
  * Created by Siddharth Verma on 6/6/16.
  */
+
 public class Pagination {
     private final boolean mIncludePad;
     private final int mWidth;
@@ -22,7 +20,6 @@ public class Pagination {
     private final CharSequence mText;
     private final TextPaint mPaint;
     public final List<CharSequence> mPages;
-    private final boolean mReverse;
 
     public Pagination(CharSequence text, int pageW, int pageH, TextPaint paint, float spacingMult, float spacingAdd, boolean inclidePad, boolean reverse) {
         this.mText = text;
@@ -33,9 +30,8 @@ public class Pagination {
         this.mSpacingAdd = spacingAdd;
         this.mIncludePad = inclidePad;
         this.mPages = new ArrayList<CharSequence>();
-        this.mReverse = reverse;
 
-        if (mReverse)
+        if (reverse)
             layout();
 
         else reverseLayout();
@@ -63,7 +59,6 @@ public class Pagination {
                 return;
             }
         }
-        Log.v("abc", "abc");
     }
 
     private void reverseLayout() {
@@ -93,8 +88,6 @@ public class Pagination {
                 return;
             }
         }
-        // Collections.reverse(mPages);
-        Log.v("abc","abc");
     }
 
     private void addPage(CharSequence text) {
