@@ -1,9 +1,10 @@
-package com.example.onlinetyari.storyreader;
+package com.example.onlinetyari.storyreader.activity;
 
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.Html;
 import android.text.Layout;
 import android.text.Spanned;
@@ -18,11 +19,19 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.example.onlinetyari.storyreader.R;
+import com.example.onlinetyari.storyreader.pagination.Pagination;
+
 import java.util.Collections;
 
-public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBarChangeListener {
+public class StoryActivity extends AppCompatActivity implements
+        SeekBar.OnSeekBarChangeListener,
+        View.OnClickListener {
 
     public TextView textView;
+    public Button backButton;
+    public Button forwardButton;
+    public SeekBar seekBar;
 
     public Pagination mPagination;
     public Pagination prevPagination;
@@ -32,12 +41,9 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
     public CharSequence currentText;
     public CharSequence nextText;
     public int mCurrentIndex = 0;
-    public Button backButton;
-    public Button forwardButton;
-    public SeekBar seekBar;
     public int i;
-    public int oldProgress = 24;
-    public SharedPreferences mSettings ;
+    public int oldProgress;
+    public SharedPreferences mSettings;
 
     public static final int MIN_FONT = 12;
     public static final int MAX_FONT = 34;
@@ -48,7 +54,11 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.content_story);
+        setContentView(R.layout.activity_story);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        assert toolbar != null;
+        toolbar.setTitle(R.string.app_name);
 
         textView = (TextView) findViewById(R.id.textView);
         assert textView != null;
@@ -58,12 +68,7 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
             sb.append("This text helps to create some bulk content. " + i + " \n");
         }
         String book_content = sb.toString();
-        textView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                seekBar.setVisibility(View.VISIBLE);
-            }
-        });
+        textView.setOnClickListener(this);
 
         Spanned htmlString = Html.fromHtml(book_content);
         mText = TextUtils.concat(htmlString);
@@ -122,29 +127,13 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
         backButton = (Button) findViewById(R.id.back_btn);
         forwardButton = (Button) findViewById(R.id.forward_btn);
 
-        backButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mCurrentIndex > 0) {
-                    mCurrentIndex--;
-                    update();
-                }
-            }
-        });
+        backButton.setOnClickListener(this);
 
-        forwardButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (mCurrentIndex < mPagination.size() - 1) {
-                    mCurrentIndex++;
-                    update();
-                }
-            }
-        });
+        forwardButton.setOnClickListener(this);
 
         seekBar = (SeekBar) findViewById(R.id.seek_bar);
         assert seekBar != null;
-        oldProgress = (int) getProgress(OPTIMAL_FONT);
+        oldProgress = getProgressFromTextSize(OPTIMAL_FONT);
         seekBar.setProgress(oldProgress);
         seekBar.setOnSeekBarChangeListener(this);
         seekBar.setVisibility(View.GONE);
@@ -174,13 +163,14 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
     @Override
     public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
-        textView.setTextSize(getProgress(progress));
+
+        textView.setTextSize(getTextSizeFromProgress(progress));
 
         textView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
 
-                if (progress > oldProgress) {
+                if (progress > oldProgress && mCurrentIndex != 0) {
                     // Removing layout listener to avoid multiple calls
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
                         textView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
@@ -252,16 +242,23 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
                     mPagination.mPages.clear();
 
-                    mPagination.mPages.addAll(prevPagination.mPages);
+                    if (!prevText.equals(""))
+                        mPagination.mPages.addAll(prevPagination.mPages);
 
                     mPagination.mPages.add(newCurrentText);
 
-                    mPagination.mPages.addAll(nextPagination.mPages);
-                    mCurrentIndex = prevPagination.mPages.size();
+                    if (!nextText.equals(""))
+                        mPagination.mPages.addAll(nextPagination.mPages);
+
+                    if (mCurrentIndex == 0)
+                        mCurrentIndex = prevPagination.mPages.size() - 1;
+
+                    else mCurrentIndex = prevPagination.mPages.size();
+
                     update();
                 }
 
-                if (progress < oldProgress) {
+                if ((progress < oldProgress) || (progress > oldProgress && mCurrentIndex == 0)) {
                     // Removing layout listener to avoid multiple calls
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
                         textView.getViewTreeObserver().removeGlobalOnLayoutListener(this);
@@ -312,7 +309,6 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
                             textView.getLineSpacingExtra(),
                             textView.getIncludeFontPadding(),
                             true);
-                    // update();
 
                     CharSequence reverse = new StringBuilder(prevText).reverse().toString();
 
@@ -331,7 +327,10 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
                     int startIndex = currentText.length() - newCurrentText.length();
                     stringBuilder = new StringBuilder();
-                    startIndex = nextPageText.length() - startIndex;
+                    if (startIndex < nextPageText.length())
+                        startIndex = nextPageText.length() - startIndex;
+                    else startIndex = startIndex - nextPageText.length();
+
                     stringBuilder.append(nextText.subSequence(startIndex, nextText.length()));
                     nextText = stringBuilder.toString();
 
@@ -346,14 +345,18 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
                     mPagination.mPages.clear();
 
-                    mPagination.mPages.addAll(prevPagination.mPages);
+                    if (!prevText.equals(""))
+                        mPagination.mPages.addAll(prevPagination.mPages);
 
                     mPagination.mPages.add(newCurrentText);
 
                     if (!nextText.equals(""))
                         mPagination.mPages.addAll(nextPagination.mPages);
 
-                    mCurrentIndex = prevPagination.mPages.size();
+                    if (mCurrentIndex == 0)
+                        mCurrentIndex = prevPagination.mPages.size() - 1;
+
+                    else mCurrentIndex = prevPagination.mPages.size();
 
                     update();
                 }
@@ -434,9 +437,36 @@ public class StoryActivity extends AppCompatActivity implements SeekBar.OnSeekBa
 
     }
 
-    public float getProgress(int progress) {
+    public float getTextSizeFromProgress(int progress) {
         float slope = ((float)(MAX_FONT - MIN_FONT) / (MAX_PROGRESS - MIN_PROGRESS));
         return (float) MIN_FONT + (slope * (progress - MIN_PROGRESS));
     }
 
+    public int getProgressFromTextSize(int textSize) {
+        float slope = ((float) (MAX_PROGRESS - MIN_PROGRESS) / (MAX_FONT - MIN_FONT));
+        return MIN_PROGRESS + (int) (slope * (textSize - MIN_FONT));
+    }
+
+    @Override
+    public void onClick(View v) {
+
+        switch (v.getId()) {
+            case R.id.back_btn : if (mCurrentIndex > 0) {
+                                    mCurrentIndex--;
+                                    update();
+                                 }
+                                 break;
+
+            case R.id.forward_btn : if (mCurrentIndex < mPagination.size() - 1) {
+                                        mCurrentIndex++;
+                                        update();
+                                    }
+                                    break;
+
+            case R.id.textView : seekBar.setVisibility(View.VISIBLE);
+                                 break;
+
+            default : break;
+        }
+    }
 }

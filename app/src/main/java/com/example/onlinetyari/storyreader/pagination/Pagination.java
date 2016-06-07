@@ -1,4 +1,4 @@
-package com.example.onlinetyari.storyreader;
+package com.example.onlinetyari.storyreader.pagination;
 
 import android.text.Layout;
 import android.text.StaticLayout;
@@ -11,7 +11,8 @@ import java.util.List;
  * Created by Siddharth Verma on 6/6/16.
  */
 
-public class Pagination {
+public class Pagination implements
+        PaginationInterface {
     private final boolean mIncludePad;
     private final int mWidth;
     private final int mHeight;
@@ -37,7 +38,8 @@ public class Pagination {
         else reverseLayout();
     }
 
-    private void layout() {
+    @Override
+    public void layout() {
         final StaticLayout layout = new StaticLayout(mText, mPaint, mWidth, Layout.Alignment.ALIGN_NORMAL, mSpacingMult, mSpacingAdd, mIncludePad);
 
         final int lines = layout.getLineCount();
@@ -61,7 +63,8 @@ public class Pagination {
         }
     }
 
-    private void reverseLayout() {
+    @Override
+    public void reverseLayout() {
         final StaticLayout layout = new StaticLayout(mText, mPaint, mWidth, Layout.Alignment.ALIGN_NORMAL, mSpacingMult, mSpacingAdd, mIncludePad);
 
         final int lines = layout.getLineCount();
@@ -90,14 +93,17 @@ public class Pagination {
         }
     }
 
-    private void addPage(CharSequence text) {
+    @Override
+    public void addPage(CharSequence text) {
         mPages.add(text);
     }
 
+    @Override
     public int size() {
         return mPages.size();
     }
 
+    @Override
     public CharSequence get(int index) {
         return (index >= 0 && index < mPages.size()) ? mPages.get(index) : null;
     }
