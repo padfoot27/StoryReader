@@ -73,6 +73,7 @@ public class Pagination implements
         int height = mHeight;
         String subSeq;
         CharSequence reverse;
+
         for (int i = 0; i < lines; i++) {
             if (height < layout.getLineBottom(i)) {
                 // When the layout height has been exceeded
