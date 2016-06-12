@@ -14,7 +14,9 @@
         android:id="@+id/textView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="@dimen/textview_margin" />
+        android:layout_marginRight="@dimen/textview_margin"
+        android:layout_marginLeft="@dimen/textview_margin"
+        android:layout_marginTop="@dimen/textview_margin" />
 
     <LinearLayout
         android:id="@+id/button"

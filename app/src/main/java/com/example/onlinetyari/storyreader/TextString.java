@@ -11,8 +11,8 @@ public class TextString {
             "\n" +
             "Our subdivision, Jefferson Park, used to be a navy base. But then the navy didn’t need it anymore, so it returned the land to the citizens of Orlando, Florida, who decided to build a massive subdivision, because that’s what Florida does with land. My parents and Margo’s parents ended up moving next door to one another just after the first houses were built. Margo and I were two.\n" +
             "\n" +
-            "Before Jefferson Park was a Pleasantville, and before it was a navy base, it belonged to an actual Jefferson, this guy Dr. Jefferson Jefferson. Dr. Jefferson Jefferson has a school named after him in Orlando and also a large charitable foundation, but the fascinating and unbelievable-but-true thing about Dr. Jefferson.\n" +
-            "\n" +
+            "Before Jefferson Park was a Pleasantville, and before it was a navy base, it belonged to an actual Jefferson, this guy Dr. Jefferson Jefferson. Dr. Jefferson Jefferson has a school named after him in Orlando and also a large charitable foundation, but the fascinating and unbelievable-but-true thing about Dr. Jefferson " +
+
             "Jefferson is that he was not a doctor of any kind. He was just an orange juice salesman named Jefferson Jefferson. When he became rich and powerful, he went to court, made “Jefferson” his middle name, and then changed his first name to “Dr.” Capital D.Lowercase r. Period.\n" +
             "\n" +
             "So Margo and I were nine. Our parents were friends, so we would sometimes play together, biking past the cul-de-sacced streets to Jefferson Park itself, the hub of our subdivision’s wheel.\n" +

@@ -48,18 +48,20 @@ public class Pagination implements
         int height = mHeight;
 
         for (int i = 0; i < lines; i++) {
-            if (height < layout.getLineBottom(i)) {
-                // When the layout height has been exceeded
-                addPage(text.subSequence(startOffset, layout.getLineStart(i)));
-                startOffset = layout.getLineStart(i);
-                height = layout.getLineTop(i) + mHeight;
-            }
 
             if (i == lines - 1) {
                 // Put the rest of the text into the last page
                 addPage(text.subSequence(startOffset, layout.getLineEnd(i)));
                 return;
             }
+
+            if (height < layout.getLineBottom(i + 1)) {
+                // When the layout height has been exceeded
+                addPage(text.subSequence(startOffset, layout.getLineStart(i + 1)));
+                startOffset = layout.getLineStart(i + 1);
+                height = layout.getLineTop(i + 1) + mHeight;
+            }
+
         }
     }
 
@@ -75,15 +77,6 @@ public class Pagination implements
         CharSequence reverse;
 
         for (int i = 0; i < lines; i++) {
-            if (height < layout.getLineBottom(i)) {
-                // When the layout height has been exceeded
-                subSeq = text.subSequence(startOffset, layout.getLineStart(i)).toString();
-                reverse = new StringBuilder(subSeq).reverse().toString();
-                addPage(reverse);
-                startOffset = layout.getLineStart(i);
-                height = layout.getLineTop(i) + mHeight;
-            }
-
             if (i == lines - 1) {
                 // Put the rest of the text into the last page
                 subSeq = text.subSequence(startOffset, layout.getLineEnd(i)).toString();
@@ -91,6 +84,17 @@ public class Pagination implements
                 addPage(reverse);
                 return;
             }
+
+            if (height < layout.getLineBottom(i + 1)) {
+                // When the layout height has been exceeded
+                subSeq = text.subSequence(startOffset, layout.getLineStart(i + 1)).toString();
+                reverse = new StringBuilder(subSeq).reverse().toString();
+                addPage(reverse);
+                startOffset = layout.getLineStart(i + 1);
+                height = layout.getLineTop(i + 1) + mHeight;
+            }
+
+
         }
     }
 
